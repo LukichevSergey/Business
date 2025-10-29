@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Кликер: Аренда</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>💰 Кликер</h1>
+
+    <!-- Вкладки -->
+    <nav>
+      <ul>
+        <li><a href="#" id="tab-clicker" class="active">Кликер</a></li>
+        <li><a href="#" id="tab-rent">Аренда</a></li>
+      </ul>
+    </nav>
+
+    <!-- Кликер -->
+    <div id="clicker-content" class="tab-content active">
+      <div id="money">Деньги: $0</div>
+      <button id="clickBtn">Кликни меня! (+$1)</button>
+    </div>
+
+    <!-- Аренда (каталог домов) -->
+    <div id="rent-content" class="tab-content">
+      <h2>🏡 Каталог недвижимости</h2>
+      <p>Купите дом — и он будет приносить доход даже в оффлайне!</p>
+      <div id="houses-list"></div>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

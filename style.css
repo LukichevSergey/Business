@@ -1,0 +1,133 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f7fa;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .container {
+    max-width: 700px;
+    margin: 30px auto;
+    padding: 25px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    text-align: center;
+  }
+  
+  h1 {
+    color: #2c3e50;
+    margin-top: 0;
+  }
+  
+  h2 {
+    color: #3498db;
+    margin-bottom: 15px;
+  }
+  
+  /* Вкладки */
+  nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+  
+  nav ul li a {
+    text-decoration: none;
+    color: #2c3e50;
+    padding: 10px 20px;
+    border-radius: 8px;
+    background-color: #ecf0f1;
+    font-weight: bold;
+    transition: background 0.2s;
+  }
+  
+  nav ul li a.active,
+  nav ul li a:hover {
+    background-color: #3498db;
+    color: white;
+  }
+  
+  /* Скрытие/показ контента */
+  .tab-content {
+    display: none;
+  }
+  
+  .tab-content.active {
+    display: block;
+  }
+  
+  /* Кнопки */
+  #clickBtn {
+    padding: 14px 28px;
+    font-size: 18px;
+    background-color: #2ecc71;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin: 15px 0;
+    transition: background 0.2s;
+  }
+  
+  #clickBtn:hover {
+    background-color: #27ae60;
+  }
+  
+  /* Дома */
+  .house-item {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 16px;
+    margin: 12px 0;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .house-info h3 {
+    margin: 0 0 6px 0;
+    color: #2c3e50;
+  }
+  
+  .house-info p {
+    margin: 4px 0;
+    font-size: 14px;
+    color: #7f8c8d;
+  }
+  
+  .buy-btn {
+    padding: 8px 16px;
+    font-size: 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  
+  .buy-btn:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+    color: #95a5a6;
+  }
+  
+  .buy-btn:not(:disabled) {
+    background-color: #3498db;
+    color: white;
+  }
+  
+  .buy-btn:not(:disabled):hover {
+    background-color: #2980b9;
+  }
+  
+  #money {
+    font-size: 24px;
+    font-weight: bold;
+    color: #27ae60;
+    margin: 15px 0;
+  }
