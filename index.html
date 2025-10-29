@@ -3,32 +3,46 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Кликер: Аренда</title>
+  <title>💰 Кликер</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
-    <h1>💰 Кликер</h1>
+    <!-- Заголовок и статус-бар -->
+    <div class="header">
+      <h1>💰 Кликер</h1>
+      <div class="stats-bar">
+        <div class="stat"><strong>Баланс:</strong> <span id="money">$0</span></div>
+        <div class="stat"><strong>Доход:</strong> <span id="incomePerSec">$0.00</span>/сек</div>
+      </div>
+    </div>
 
     <!-- Вкладки -->
     <nav>
       <ul>
         <li><a href="#" id="tab-clicker" class="active">Кликер</a></li>
         <li><a href="#" id="tab-rent">Аренда</a></li>
+        <li><a href="#" id="tab-invest">Инвестиции</a></li>
       </ul>
     </nav>
 
     <!-- Кликер -->
     <div id="clicker-content" class="tab-content active">
-      <div id="money">Деньги: $0</div>
       <button id="clickBtn">Кликни меня! (+$1)</button>
     </div>
 
-    <!-- Аренда (каталог домов) -->
+    <!-- Аренда -->
     <div id="rent-content" class="tab-content">
       <h2>🏡 Каталог недвижимости</h2>
       <p>Купите дом — и он будет приносить доход даже в оффлайне!</p>
       <div id="houses-list"></div>
+    </div>
+
+    <!-- Инвестиции -->
+    <div id="invest-content" class="tab-content">
+      <h2>📈 Инвестиционные активы</h2>
+      <p>Вкладывайте деньги — получайте пассивный доход!</p>
+      <div id="investments-list"></div>
     </div>
   </div>
   <script src="script.js"></script>
