@@ -1,9 +1,17 @@
 // --- Конфигурация домов ---
 const HOUSES = [
-    { id: 'hut', name: 'Хижина', cost: 20, income: 0.1 },
-    { id: 'apartment', name: 'Квартира', cost: 100, income: 0.5 },
-    { id: 'townhouse', name: 'Таунхаус', cost: 500, income: 2 },
-    { id: 'villa', name: 'Вилла', cost: 2000, income: 8 }
+    { id: 'hut',          name: 'Хижина',             cost: 20,        income: 0.67 },   // ROI ~30 сек
+    { id: 'apartment',    name: 'Квартира',           cost: 100,       income: 3.33 },   // ROI ~30 сек
+    { id: 'townhouse',    name: 'Таунхаус',           cost: 500,       income: 16.67 },  // ROI ~30 сек
+    { id: 'villa',        name: 'Вилла',              cost: 2500,      income: 83.33 },  // ROI ~30 сек
+    { id: 'mansion',      name: 'Особняк',            cost: 12500,     income: 416.67 }, // ROI ~30 сек
+    { id: 'skyscraper',   name: 'Небоскрёб',          cost: 62500,     income: 2083.33 },
+    { id: 'hotel',        name: 'Гостиничный комплекс', cost: 312500,    income: 10416.67 },
+    { id: 'resort',       name: 'Курорт',             cost: 1562500,   income: 52083.33 },
+    { id: 'cityblock',    name: 'Квартал',            cost: 7812500,   income: 260416.67 },
+    { id: 'megacity',     name: 'Мегаполис',          cost: 39062500,  income: 1302083.33 },
+    { id: 'orbital',      name: 'Орбитальный жилой модуль', cost: 195312500, income: 6510416.67 },
+    { id: 'galaxy',       name: 'Галактическая резиденция', cost: 976562500, income: 32552083.33 }
   ];
   
   // --- Игровое состояние ---
@@ -39,6 +47,13 @@ const HOUSES = [
       gameState.lastUpdate = Number(parsed.lastUpdate) || Date.now();
     }
   }
+
+  function formatNumber(num) {
+    return num.toLocaleString('ru-RU', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
   
   function getTotalIncomePerSecond() {
     let total = 0;
@@ -59,7 +74,7 @@ const HOUSES = [
   }
   
   function updateDisplays() {
-    moneyDisplay.textContent = `Деньги: $${gameState.money.toFixed(2)}`;
+    moneyDisplay.textContent = `Деньги: $${formatNumber(gameState.money)}`;
     renderHouses();
   }
   
@@ -75,8 +90,8 @@ const HOUSES = [
       houseEl.innerHTML = `
         <div class="house-info">
           <h3>${house.name}</h3>
-          <p>Стоимость: $${house.cost}</p>
-          <p>Доход: $${house.income}/сек</p>
+          <p>Стоимость: $${formatNumber(house.cost)}</p>
+          <p>Доход: $${formatNumber(house.income)}/сек</p>
           ${isOwned ? '<p style="color:green; font-weight:bold;">✅ Куплено</p>' : ''}
         </div>
         <button class="buy-btn" ${isOwned || !canAfford ? 'disabled' : ''}>
