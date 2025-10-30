@@ -1,4 +1,5 @@
 // --- Конфигурация активов ---
+// income = доход в ДОЛЛАРАХ ЗА ЧАС
 
 const RENTALS = [
   { id: 'studio',     name: '1-комн. квартира',   cost: 100,    income: 10 },
@@ -9,21 +10,21 @@ const RENTALS = [
 ];
 
 const INVESTMENTS = [
-  { id: 'savings',        name: 'Сберегательный счёт',     cost: 50,         income: 0.5 },
-  { id: 'bonds',          name: 'Государственные облигации', cost: 300,        income: 4 },
-  { id: 'stocks',         name: 'Акции',                   cost: 2000,       income: 30 },
-  { id: 'portfolio',      name: 'Фондовый портфель',       cost: 15000,      income: 250 },
-  { id: 'hedge_fund',     name: 'Хедж-фонд',               cost: 120000,     income: 2200 },
-  { id: 'venture',        name: 'Венчурный капитал',       cost: 1000000,    income: 20000 },
-  { id: 'private_bank',   name: 'Частный банк',            cost: 8000000,    income: 180000 },
-  { id: 'global_fund',    name: 'Мировой инвестиционный фонд', cost: 60000000, income: 1500000 }
+  { id: 'savings',        name: 'Сберегательный счёт',     cost: 50,         income: 6 },       // ROI ~8.3 ч
+  { id: 'bonds',          name: 'Государственные облигации', cost: 300,        income: 40 },      // ROI ~7.5 ч
+  { id: 'stocks',         name: 'Акции',                   cost: 2000,       income: 300 },     // ROI ~6.7 ч
+  { id: 'portfolio',      name: 'Фондовый портфель',       cost: 15000,      income: 2500 },    // ROI ~6 ч
+  { id: 'hedge_fund',     name: 'Хедж-фонд',               cost: 120000,     income: 22000 },   // ROI ~5.5 ч
+  { id: 'venture',        name: 'Венчурный капитал',       cost: 1000000,    income: 200000 },  // ROI ~5 ч
+  { id: 'private_bank',   name: 'Частный банк',            cost: 8000000,    income: 1800000 }, // ROI ~4.4 ч
+  { id: 'global_fund',    name: 'Мировой инвестиционный фонд', cost: 60000000, income: 15000000 } // ROI ~4 ч
 ];
 
 // --- Игровое состояние ---
 let gameState = {
   money: 0,
-  ownedRentals: {},       // теперь: { studio: 3, house1: 1, ... }
-  ownedInvestments: {},   // остаётся уникальным (покупка один раз)
+  ownedRentals: {},
+  ownedInvestments: {},
   lastUpdate: Date.now()
 };
 
@@ -50,6 +51,11 @@ const tabClicker = document.getElementById('tab-clicker');
 const tabRent = document.getElementById('tab-rent');
 const tabInvest = document.getElementById('tab-invest');
 
+// --- Вспомогательная функция: доход в секунду из дохода в час ---
+function hourlyToPerSecond(hourly) {
+  return hourly / 3600;
+}
+
 // --- Сохранение и загрузка ---
 function saveGame() {
   gameState.lastUpdate = Date.now();
@@ -67,19 +73,19 @@ function loadGame() {
   }
 }
 
-// --- Расчёт общего дохода ---
+// --- Общий доход в секунду ---
 function getTotalIncomePerSecond() {
   let total = 0;
 
-  // Аренда: количество × доход на единицу
   RENTALS.forEach(item => {
     const count = gameState.ownedRentals[item.id] || 0;
-    total += count * item.income;
+    total += count * hourlyToPerSecond(item.income);
   });
 
-  // Инвестиции: только куплено/не куплено
   INVESTMENTS.forEach(inv => {
-    if (gameState.ownedInvestments[inv.id]) total += inv.income;
+    if (gameState.ownedInvestments[inv.id]) {
+      total += hourlyToPerSecond(inv.income);
+    }
   });
 
   return total;
@@ -99,7 +105,7 @@ function renderRentals() {
   rentalsList.innerHTML = '';
   RENTALS.forEach(item => {
     const count = gameState.ownedRentals[item.id] || 0;
-    const totalIncome = count * item.income;
+    const totalHourly = count * item.income;
     const canAfford = gameState.money >= item.cost;
 
     const el = document.createElement('div');
@@ -108,8 +114,8 @@ function renderRentals() {
       <div class="asset-info">
         <h3>${item.name}</h3>
         <p>Стоимость: $${formatNumber(item.cost)}</p>
-        <p>Доход за шт.: $${formatNumber(item.income)}/сек</p>
-        <p>Куплено: ${count} шт. → Общий доход: $${formatNumber(totalIncome)}/сек</p>
+        <p>Доход: $${formatNumber(item.income)}/час за шт.</p>
+        <p>Куплено: ${count} шт. → Общий доход: $${formatNumber(totalHourly)}/час</p>
       </div>
       <button class="buy-btn" ${!canAfford ? 'disabled' : ''}>
         Купить
@@ -129,7 +135,7 @@ function renderRentals() {
   });
 }
 
-// --- Рендер инвестиций (без изменений) ---
+// --- Рендер инвестиций ---
 function renderInvestments() {
   investmentsList.innerHTML = '';
   INVESTMENTS.forEach(inv => {
@@ -142,7 +148,7 @@ function renderInvestments() {
       <div class="asset-info">
         <h3>${inv.name}</h3>
         <p>Стоимость: $${formatNumber(inv.cost)}</p>
-        <p>Доход: $${formatNumber(inv.income)}/сек</p>
+        <p>Доход: $${formatNumber(inv.income)}/час</p>
         ${isOwned ? '<p style="color:green; font-weight:bold;">✅ Куплено</p>' : ''}
       </div>
       <button class="buy-btn" ${isOwned || !canAfford ? 'disabled' : ''}>
@@ -168,7 +174,9 @@ function renderInvestments() {
 // --- Обновление интерфейса ---
 function updateDisplays() {
   moneyDisplay.textContent = `$${formatNumber(gameState.money)}`;
-  incomePerSecDisplay.textContent = `$${formatNumber(getTotalIncomePerSecond())}`;
+  // Отображаем общий доход в час (чтобы игроку было понятно)
+  const totalHourly = getTotalIncomePerSecond() * 3600;
+  incomePerSecDisplay.textContent = `$${formatNumber(totalHourly)}`;
   renderRentals();
   renderInvestments();
 }
@@ -201,7 +209,7 @@ tabClicker.addEventListener('click', (e) => { e.preventDefault(); switchTab('cli
 tabRent.addEventListener('click', (e) => { e.preventDefault(); switchTab('rent'); });
 tabInvest.addEventListener('click', (e) => { e.preventDefault(); switchTab('invest'); });
 
-// --- Онлайн-доход каждые 3 секунды ---
+// --- Онлайн-доход каждую секунду ---
 setInterval(() => {
   const income = getTotalIncomePerSecond();
   if (income > 0) {
