@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>💰 Кликер</title>
+  <title>💰 Игра: Работа, Аренда, Инвестиции</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
     <!-- Заголовок и статус-бар -->
     <div class="header">
-      <h1>💰 Кликер</h1>
+      <h1>💰 Игра</h1>
       <div class="stats-bar">
         <div class="stat"><strong>Баланс:</strong> <span id="money">$0</span></div>
         <div class="stat"><strong>Доход:</strong> <span id="incomePerSec">$0.00</span>/час</div>
@@ -18,7 +18,6 @@
           <strong>Налог:</strong> <span id="taxDebt">$0.00</span>
           <button id="payTaxBtn" class="pay-tax-btn">Оплатить</button>
         </div>
-        <!-- Временная кнопка сброса -->
         <div class="stat">
           <button id="resetDevBtn" class="reset-dev-btn">🔄 Сбросить игру</button>
         </div>
@@ -28,15 +27,29 @@
     <!-- Вкладки -->
     <nav>
       <ul>
-        <li><a href="#" id="tab-clicker" class="active">Кликер</a></li>
-        <li><a href="#" id="tab-rent">Аренда</a></li>
-        <li><a href="#" id="tab-invest">Инвестиции</a></li>
+        <li><a href="#" id="tab-work" class="active">💼 Работа</a></li>
+        <li><a href="#" id="tab-rent">🏡 Аренда</a></li>
+        <li><a href="#" id="tab-invest">📈 Инвестиции</a></li>
       </ul>
     </nav>
 
-    <!-- Кликер -->
-    <div id="clicker-content" class="tab-content active">
-      <button id="clickBtn">Кликни меня! (+$1)</button>
+    <!-- Работа -->
+    <div id="work-content" class="tab-content active">
+      <h2>💼 Работа</h2>
+      <div class="work-info">
+        <p><strong>Уровень образования:</strong> <span id="educationLevel">Нет</span></p>
+        <p><strong>Дней подряд:</strong> <span id="streakDays">0</span></p>
+        <p><strong>Доход за сессию:</strong> $<span id="workIncome">10.00</span></p>
+        <p id="workStatus">Готов к работе</p>
+        <button id="workBtn">Пойти на работу (60 сек)</button>
+      </div>
+
+      <h3>🎓 Получить образование</h3>
+      <div class="education-controls">
+        <button id="eduBasic">Начальное (120 сек)</button>
+        <button id="eduSecondary">Среднее (300 сек)</button>
+        <button id="eduHigher">Высшее (600 сек)</button>
+      </div>
     </div>
 
     <!-- Аренда -->
@@ -46,44 +59,44 @@
       <div id="rentals-list"></div>
     </div>
 
-<!-- Инвестиции -->
-<div id="invest-content" class="tab-content">
-  <h2>📈 Инвестиции</h2>
-  <p>Вкладывайте деньги и получайте пассивный доход. Доход начисляется ежесекундно.</p>
+    <!-- Инвестиции -->
+    <div id="invest-content" class="tab-content">
+      <h2>📈 Инвестиции</h2>
+      <p>Вкладывайте деньги и получайте пассивный доход.</p>
 
-  <div class="investment-item">
-    <h3>Акции (20% годовых)</h3>
-    <p>Баланс: $<span id="stocksBalance">0.00</span></p>
-    <p>Доход: $<span id="stocksIncome">0.00</span>/час</p>
-    <div class="invest-controls">
-      <input type="number" id="stocksInput" placeholder="Сумма" min="0" step="100">
-      <button id="stocksInvest">Вложить</button>
-      <button id="stocksWithdraw">Снять</button>
-    </div>
-  </div>
+      <div class="investment-item">
+        <h3>Акции (20% годовых)</h3>
+        <p>Баланс: $<span id="stocksBalance">0.00</span></p>
+        <p>Доход: $<span id="stocksIncome">0.00</span>/час</p>
+        <div class="invest-controls">
+          <input type="number" id="stocksInput" placeholder="Сумма" min="0" step="100">
+          <button id="stocksInvest">Вложить</button>
+          <button id="stocksWithdraw">Снять</button>
+        </div>
+      </div>
 
-  <div class="investment-item">
-    <h3>Облигации (10% годовых)</h3>
-    <p>Баланс: $<span id="bondsBalance">0.00</span></p>
-    <p>Доход: $<span id="bondsIncome">0.00</span>/час</p>
-    <div class="invest-controls">
-      <input type="number" id="bondsInput" placeholder="Сумма" min="0" step="100">
-      <button id="bondsInvest">Вложить</button>
-      <button id="bondsWithdraw">Снять</button>
-    </div>
-  </div>
+      <div class="investment-item">
+        <h3>Облигации (10% годовых)</h3>
+        <p>Баланс: $<span id="bondsBalance">0.00</span></p>
+        <p>Доход: $<span id="bondsIncome">0.00</span>/час</p>
+        <div class="invest-controls">
+          <input type="number" id="bondsInput" placeholder="Сумма" min="0" step="100">
+          <button id="bondsInvest">Вложить</button>
+          <button id="bondsWithdraw">Снять</button>
+        </div>
+      </div>
 
-  <div class="investment-item">
-    <h3>Фонды (15% годовых)</h3>
-    <p>Баланс: $<span id="fundsBalance">0.00</span></p>
-    <p>Доход: $<span id="fundsIncome">0.00</span>/час</p>
-    <div class="invest-controls">
-      <input type="number" id="fundsInput" placeholder="Сумма" min="0" step="100">
-      <button id="fundsInvest">Вложить</button>
-      <button id="fundsWithdraw">Снять</button>
+      <div class="investment-item">
+        <h3>Фонды (15% годовых)</h3>
+        <p>Баланс: $<span id="fundsBalance">0.00</span></p>
+        <p>Доход: $<span id="fundsIncome">0.00</span>/час</p>
+        <div class="invest-controls">
+          <input type="number" id="fundsInput" placeholder="Сумма" min="0" step="100">
+          <button id="fundsInvest">Вложить</button>
+          <button id="fundsWithdraw">Снять</button>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
   </div>
   <script src="script.js"></script>
 </body>
