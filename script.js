@@ -1,33 +1,76 @@
-// --- Конфигурация активов ---
-const RENTALS = [
-  { id: 'studio',     name: '1-комн. квартира',   cost: 100,    income: 10 },
-  { id: 'two_room',   name: '2-комн. квартира',   cost: 300,    income: 30 },
-  { id: 'three_room', name: '3-комн. квартира',   cost: 800,    income: 80 },
-  { id: 'house1',     name: 'Одноэтажный дом',    cost: 2500,   income: 250 },
-  { id: 'house2',     name: 'Двухэтажный дом',    cost: 7000,   income: 700 }
+/**
+ * =============
+ * КОНФИГУРАЦИЯ
+ * =============
+ */
+
+/** @constant {number} Налоговая ставка (10%) */
+const TAX_RATE = 0.1;
+
+/** @constant {number} Порог принудительного списания налога (в $) */
+const TAX_ENFORCEMENT_THRESHOLD = 100;
+
+/** @constant {number} Интервал автоматического обновления UI в миллисекундах */
+const UI_UPDATE_INTERVAL_MS = 3000; // 3 секунды
+
+/** @constant {number} Множитель для перевода дохода в час → в секунду */
+const HOURS_TO_SECONDS = 3600;
+
+/**
+ * Каталог активов.
+ * Каждый актив имеет:
+ * - id: уникальный ключ
+ * - name: отображаемое имя
+ * - cost: стоимость покупки
+ * - income: доход в ДОЛЛАРАХ ЗА ЧАС
+ * - type: 'rental' | 'investment'
+ * - isUnique: true — можно купить 1 раз, false — многократно
+ */
+const ASSETS = [
+  // Аренда (многократная покупка)
+  { id: 'studio',     name: '1-комн. квартира',   cost: 100,    income: 10,     type: 'rental',     isUnique: false },
+  { id: 'two_room',   name: '2-комн. квартира',   cost: 300,    income: 30,     type: 'rental',     isUnique: false },
+  { id: 'three_room', name: '3-комн. квартира',   cost: 800,    income: 80,     type: 'rental',     isUnique: false },
+  { id: 'house1',     name: 'Одноэтажный дом',    cost: 2500,   income: 250,    type: 'rental',     isUnique: false },
+  { id: 'house2',     name: 'Двухэтажный дом',    cost: 7000,   income: 700,    type: 'rental',     isUnique: false },
+
+  // Инвестиции (уникальные)
+  { id: 'savings',        name: 'Сберегательный счёт',     cost: 50,         income: 6,       type: 'investment', isUnique: true },
+  { id: 'bonds',          name: 'Государственные облигации', cost: 300,        income: 40,      type: 'investment', isUnique: true },
+  { id: 'stocks',         name: 'Акции',                   cost: 2000,       income: 300,     type: 'investment', isUnique: true },
+  { id: 'portfolio',      name: 'Фондовый портфель',       cost: 15000,      income: 2500,    type: 'investment', isUnique: true },
+  { id: 'hedge_fund',     name: 'Хедж-фонд',               cost: 120000,     income: 22000,   type: 'investment', isUnique: true },
+  { id: 'venture',        name: 'Венчурный капитал',       cost: 1000000,    income: 200000,  type: 'investment', isUnique: true },
+  { id: 'private_bank',   name: 'Частный банк',            cost: 8000000,    income: 1800000, type: 'investment', isUnique: true },
+  { id: 'global_fund',    name: 'Мировой инвестиционный фонд', cost: 60000000, income: 15000000, type: 'investment', isUnique: true }
 ];
 
-const INVESTMENTS = [
-  { id: 'savings',        name: 'Сберегательный счёт',     cost: 50,         income: 6 },
-  { id: 'bonds',          name: 'Государственные облигации', cost: 300,        income: 40 },
-  { id: 'stocks',         name: 'Акции',                   cost: 2000,       income: 300 },
-  { id: 'portfolio',      name: 'Фондовый портфель',       cost: 15000,      income: 2500 },
-  { id: 'hedge_fund',     name: 'Хедж-фонд',               cost: 120000,     income: 22000 },
-  { id: 'venture',        name: 'Венчурный капитал',       cost: 1000000,    income: 200000 },
-  { id: 'private_bank',   name: 'Частный банк',            cost: 8000000,    income: 1800000 },
-  { id: 'global_fund',    name: 'Мировой инвестиционный фонд', cost: 60000000, income: 15000000 }
-];
-
-// --- Игровое состояние ---
+/**
+ * =============
+ * СОСТОЯНИЕ ИГРЫ
+ * =============
+ */
 let gameState = {
   money: 0,
   taxDebt: 0,
+  /** @type {Record<string, number>} количество для неуникальных активов */
   ownedRentals: {},
+  /** @type {Record<string, boolean>} куплено/не куплено для уникальных */
   ownedInvestments: {},
   lastUpdate: Date.now()
 };
 
-// --- Форматирование чисел ---
+/**
+ * =============
+ * ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+ * =============
+ */
+
+/**
+ * Форматирует число с разделителем тысяч и 2 знаками после запятой.
+ * @param {number} num - число для форматирования
+ * @returns {string}
+ */
 function formatNumber(num) {
   return num.toLocaleString('ru-RU', {
     minimumFractionDigits: 2,
@@ -35,7 +78,205 @@ function formatNumber(num) {
   });
 }
 
-// --- DOM элементы ---
+/**
+ * Конвертирует доход в час → в секунду.
+ * @param {number} hourly - доход в час
+ * @returns {number}
+ */
+function hourlyToPerSecond(hourly) {
+  return hourly / HOURS_TO_SECONDS;
+}
+
+/**
+ * Сохраняет игру в localStorage.
+ */
+function saveGame() {
+  gameState.lastUpdate = Date.now();
+  localStorage.setItem('gameState', JSON.stringify(gameState));
+}
+
+/**
+ * Загружает игру из localStorage.
+ */
+function loadGame() {
+  const saved = localStorage.getItem('gameState');
+  if (saved) {
+    const parsed = JSON.parse(saved);
+    gameState.money = parseFloat(parsed.money) || 0;
+    gameState.taxDebt = parseFloat(parsed.taxDebt) || 0;
+    gameState.ownedRentals = parsed.ownedRentals || {};
+    gameState.ownedInvestments = parsed.ownedInvestments || {};
+    gameState.lastUpdate = Number(parsed.lastUpdate) || Date.now();
+  }
+}
+
+/**
+ * Сбрасывает игру при банкротстве.
+ */
+function resetGame() {
+  alert('❗ У вас недостаточно денег для оплаты налогов!\nВы обанкротились. Игра начнётся заново.');
+  gameState = {
+    money: 0,
+    taxDebt: 0,
+    ownedRentals: {},
+    ownedInvestments: {},
+    lastUpdate: Date.now()
+  };
+  localStorage.removeItem('gameState');
+  updateDisplays();
+}
+
+/**
+ * =============
+ * СИСТЕМА АКТИВОВ
+ * =============
+ */
+
+/**
+ * Возвращает количество купленных единиц актива.
+ * @param {string} assetId - ID актива
+ * @returns {number}
+ */
+function getAssetCount(assetId) {
+  const asset = ASSETS.find(a => a.id === assetId);
+  if (!asset) return 0;
+  if (asset.isUnique) {
+    return gameState.ownedInvestments[assetId] ? 1 : 0;
+  } else {
+    return gameState.ownedRentals[assetId] || 0;
+  }
+}
+
+/**
+ * Покупает актив и обновляет UI.
+ * @param {string} assetId - ID актива
+ */
+function buyAsset(assetId) {
+  const asset = ASSETS.find(a => a.id === assetId);
+  if (!asset || gameState.money < asset.cost) return;
+
+  gameState.money -= asset.cost;
+
+  if (asset.isUnique) {
+    gameState.ownedInvestments[assetId] = true;
+  } else {
+    gameState.ownedRentals[assetId] = (gameState.ownedRentals[assetId] || 0) + 1;
+  }
+
+  updateDisplays(); // ⚡ Мгновенное обновление после покупки
+  saveGame();
+}
+
+/**
+ * Рендерит список активов по типу.
+ * @param {string} type - 'rental' или 'investment'
+ * @param {HTMLElement} container - контейнер для вставки
+ */
+function renderAssetsByType(type, container) {
+  container.innerHTML = '';
+  const assetsOfType = ASSETS.filter(asset => asset.type === type);
+
+  assetsOfType.forEach(asset => {
+    const count = getAssetCount(asset.id);
+    const totalHourly = count * asset.income;
+    const canAfford = gameState.money >= asset.cost;
+    const isOwned = asset.isUnique && count > 0;
+
+    const el = document.createElement('div');
+    el.className = 'asset-item';
+    el.innerHTML = `
+      <div class="asset-info">
+        <h3>${asset.name}</h3>
+        <p>Стоимость: $${formatNumber(asset.cost)}</p>
+        <p>Доход: $${formatNumber(asset.income)}/час ${asset.isUnique ? '' : 'за шт.'}</p>
+        ${asset.isUnique 
+          ? (isOwned ? '<p style="color:green; font-weight:bold;">✅ Куплено</p>' : '') 
+          : `<p>Куплено: ${count} шт. → Общий доход: $${formatNumber(totalHourly)}/час</p>`
+        }
+      </div>
+      <button class="buy-btn" ${(!canAfford || isOwned) ? 'disabled' : ''}>
+        ${isOwned ? 'Куплено' : 'Купить'}
+      </button>
+    `;
+
+    if (!isOwned) {
+      el.querySelector('.buy-btn').addEventListener('click', () => buyAsset(asset.id));
+    }
+
+    container.appendChild(el);
+  });
+}
+
+/**
+ * =============
+ * ФИНАНСОВАЯ СИСТЕМА
+ * =============
+ */
+
+/**
+ * Рассчитывает общий доход в час.
+ * @returns {number}
+ */
+function getTotalHourlyIncome() {
+  return ASSETS.reduce((total, asset) => {
+    const count = getAssetCount(asset.id);
+    return total + count * asset.income;
+  }, 0);
+}
+
+/**
+ * Рассчитывает доход и налог за период.
+ * @param {number} elapsedSec - прошедшее время в секундах
+ * @returns {{ income: number, tax: number }}
+ */
+function calculateIncomeAndTax(elapsedSec) {
+  let totalIncome = 0;
+  let totalTax = 0;
+
+  ASSETS.forEach(asset => {
+    const count = getAssetCount(asset.id);
+    const incomePerSec = hourlyToPerSecond(asset.income);
+    const income = count * incomePerSec * elapsedSec;
+    totalIncome += income;
+    totalTax += income * TAX_RATE;
+  });
+
+  return { income: totalIncome, tax: totalTax };
+}
+
+/**
+ * Начисляет оффлайн-доход и налог.
+ */
+function calculateOfflineIncome() {
+  const now = Date.now();
+  const elapsedSec = (now - gameState.lastUpdate) / 1000;
+  const { income, tax } = calculateIncomeAndTax(elapsedSec);
+  gameState.money += income;
+  gameState.taxDebt += tax;
+  gameState.lastUpdate = now;
+}
+
+/**
+ * Принудительно списывает налог.
+ */
+function enforceTaxPayment() {
+  if (gameState.taxDebt <= 0) return;
+
+  if (gameState.money >= gameState.taxDebt) {
+    gameState.money -= gameState.taxDebt;
+    gameState.taxDebt = 0;
+  } else {
+    resetGame();
+  }
+}
+
+/**
+ * =============
+ * UI И ИГРОВОЙ ЦИКЛ
+ * =============
+ */
+
+// DOM элементы
 const moneyDisplay = document.getElementById('money');
 const incomePerSecDisplay = document.getElementById('incomePerSec');
 const taxDebtDisplay = document.getElementById('taxDebt');
@@ -52,202 +293,25 @@ const tabClicker = document.getElementById('tab-clicker');
 const tabRent = document.getElementById('tab-rent');
 const tabInvest = document.getElementById('tab-invest');
 
-// --- Вспомогательная функция ---
-function hourlyToPerSecond(hourly) {
-  return hourly / 3600;
-}
+const resetDevBtn = document.getElementById('resetDevBtn');
 
-// --- Сохранение и загрузка ---
-function saveGame() {
-  gameState.lastUpdate = Date.now();
-  localStorage.setItem('gameState', JSON.stringify(gameState));
-}
-
-function loadGame() {
-  const saved = localStorage.getItem('gameState');
-  if (saved) {
-    const parsed = JSON.parse(saved);
-    gameState.money = parseFloat(parsed.money) || 0;
-    gameState.taxDebt = parseFloat(parsed.taxDebt) || 0;
-    gameState.ownedRentals = parsed.ownedRentals || {};
-    gameState.ownedInvestments = parsed.ownedInvestments || {};
-    gameState.lastUpdate = Number(parsed.lastUpdate) || Date.now();
-  }
-}
-
-// --- Расчёт дохода и налога ---
-function calculateIncomeAndTax(elapsedSec) {
-  let totalIncome = 0;
-  let totalTax = 0;
-
-  RENTALS.forEach(item => {
-    const count = gameState.ownedRentals[item.id] || 0;
-    const incomePerSec = hourlyToPerSecond(item.income);
-    const income = count * incomePerSec * elapsedSec;
-    totalIncome += income;
-    totalTax += income * 0.1;
-  });
-
-  INVESTMENTS.forEach(inv => {
-    if (gameState.ownedInvestments[inv.id]) {
-      const incomePerSec = hourlyToPerSecond(inv.income);
-      const income = incomePerSec * elapsedSec;
-      totalIncome += income;
-      totalTax += income * 0.1;
-    }
-  });
-
-  return { income: totalIncome, tax: totalTax };
-}
-
-// --- Оффлайн-доход и налог ---
-function calculateOfflineIncome() {
-  const now = Date.now();
-  const elapsedSec = (now - gameState.lastUpdate) / 1000;
-  const { income, tax } = calculateIncomeAndTax(elapsedSec);
-  gameState.money += income;
-  gameState.taxDebt += tax;
-  gameState.lastUpdate = now;
-}
-
-// --- Общий доход в час ---
-function getTotalHourlyIncome() {
-  let total = 0;
-  RENTALS.forEach(item => {
-    const count = gameState.ownedRentals[item.id] || 0;
-    total += count * item.income;
-  });
-  INVESTMENTS.forEach(inv => {
-    if (gameState.ownedInvestments[inv.id]) {
-      total += inv.income;
-    }
-  });
-  return total;
-}
-
-// --- Сброс игры (банкротство) ---
-function resetGame() {
-  if (confirm('Вы обанкротились! Начать новую игру?')) {
-    gameState = {
-      money: 0,
-      taxDebt: 0,
-      ownedRentals: {},
-      ownedInvestments: {},
-      lastUpdate: Date.now()
-    };
-    localStorage.removeItem('gameState');
-    updateDisplays();
-  } else {
-    // Если отказался — всё равно сбрасываем (по правилам)
-    gameState = {
-      money: 0,
-      taxDebt: 0,
-      ownedRentals: {},
-      ownedInvestments: {},
-      lastUpdate: Date.now()
-    };
-    localStorage.removeItem('gameState');
-    updateDisplays();
-  }
-}
-
-// --- Принудительное списание налога ---
-function enforceTaxPayment() {
-  if (gameState.taxDebt <= 0) return;
-
-  if (gameState.money >= gameState.taxDebt) {
-    // Хватает денег — списываем
-    gameState.money -= gameState.taxDebt;
-    gameState.taxDebt = 0;
-  } else {
-    // Не хватает → банкротство
-    alert('❗ У вас недостаточно денег для оплаты налогов!\nВы обанкротились. Игра начнётся заново.');
-    resetGame();
-    return;
-  }
-}
-
-// --- Рендер активов ---
-function renderRentals() {
-  rentalsList.innerHTML = '';
-  RENTALS.forEach(item => {
-    const count = gameState.ownedRentals[item.id] || 0;
-    const totalHourly = count * item.income;
-    const canAfford = gameState.money >= item.cost;
-
-    const el = document.createElement('div');
-    el.className = 'asset-item';
-    el.innerHTML = `
-      <div class="asset-info">
-        <h3>${item.name}</h3>
-        <p>Стоимость: $${formatNumber(item.cost)}</p>
-        <p>Доход: $${formatNumber(item.income)}/час за шт.</p>
-        <p>Куплено: ${count} шт. → Общий доход: $${formatNumber(totalHourly)}/час</p>
-      </div>
-      <button class="buy-btn" ${!canAfford ? 'disabled' : ''}>
-        Купить
-      </button>
-    `;
-
-    el.querySelector('.buy-btn').addEventListener('click', () => {
-      if (gameState.money >= item.cost) {
-        gameState.money -= item.cost;
-        gameState.ownedRentals[item.id] = (gameState.ownedRentals[item.id] || 0) + 1;
-        updateDisplays();
-        saveGame();
-      }
-    });
-
-    rentalsList.appendChild(el);
-  });
-}
-
-function renderInvestments() {
-  investmentsList.innerHTML = '';
-  INVESTMENTS.forEach(inv => {
-    const isOwned = gameState.ownedInvestments[inv.id] === true;
-    const canAfford = gameState.money >= inv.cost && !isOwned;
-
-    const el = document.createElement('div');
-    el.className = 'asset-item';
-    el.innerHTML = `
-      <div class="asset-info">
-        <h3>${inv.name}</h3>
-        <p>Стоимость: $${formatNumber(inv.cost)}</p>
-        <p>Доход: $${formatNumber(inv.income)}/час</p>
-        ${isOwned ? '<p style="color:green; font-weight:bold;">✅ Куплено</p>' : ''}
-      </div>
-      <button class="buy-btn" ${isOwned || !canAfford ? 'disabled' : ''}>
-        ${isOwned ? 'Куплено' : 'Купить'}
-      </button>
-    `;
-
-    if (!isOwned) {
-      el.querySelector('.buy-btn').addEventListener('click', () => {
-        if (gameState.money >= inv.cost) {
-          gameState.money -= inv.cost;
-          gameState.ownedInvestments[inv.id] = true;
-          updateDisplays();
-          saveGame();
-        }
-      });
-    }
-
-    investmentsList.appendChild(el);
-  });
-}
-
-// --- Обновление интерфейса ---
+/**
+ * Обновляет весь UI.
+ */
 function updateDisplays() {
   moneyDisplay.textContent = `$${formatNumber(gameState.money)}`;
   incomePerSecDisplay.textContent = `$${formatNumber(getTotalHourlyIncome())}`;
   taxDebtDisplay.textContent = `$${formatNumber(gameState.taxDebt)}`;
   payTaxBtn.disabled = gameState.taxDebt <= 0 || gameState.money < gameState.taxDebt;
-  renderRentals();
-  renderInvestments();
+
+  renderAssetsByType('rental', rentalsList);
+  renderAssetsByType('investment', investmentsList);
 }
 
-// --- Переключение вкладок ---
+/**
+ * Переключает вкладку.
+ * @param {string} tabName - 'clicker', 'rent', 'invest'
+ */
 function switchTab(tabName) {
   clickerContent.classList.toggle('active', tabName === 'clicker');
   rentContent.classList.toggle('active', tabName === 'rent');
@@ -258,36 +322,47 @@ function switchTab(tabName) {
   tabInvest.classList.toggle('active', tabName === 'invest');
 }
 
-// --- Ручная оплата налогов ---
+/**
+ * Ручная оплата налогов.
+ */
 function payTaxes() {
   if (gameState.taxDebt > 0 && gameState.money >= gameState.taxDebt) {
     gameState.money -= gameState.taxDebt;
     gameState.taxDebt = 0;
-    updateDisplays();
+    updateDisplays(); // ⚡ Мгновенное обновление
     saveGame();
   }
 }
 
-// --- Инициализация ---
+// === Инициализация ===
 loadGame();
 calculateOfflineIncome();
 updateDisplays();
 saveGame();
 
-// --- Обработчики ---
+// === Обработчики действий игрока (всегда обновляют UI сразу) ===
 clickBtn.addEventListener('click', () => {
   gameState.money += 1;
-  updateDisplays();
+  updateDisplays(); // ⚡
   saveGame();
 });
 
 payTaxBtn.addEventListener('click', payTaxes);
 
+// Временная кнопка сброса (для разработки)
+if (resetDevBtn) {
+  resetDevBtn.addEventListener('click', () => {
+    if (confirm('⚠️ Сбросить игру? Всё прогресс будет удалён.')) {
+      resetGame();
+    }
+  });
+}
+
 tabClicker.addEventListener('click', (e) => { e.preventDefault(); switchTab('clicker'); });
 tabRent.addEventListener('click', (e) => { e.preventDefault(); switchTab('rent'); });
 tabInvest.addEventListener('click', (e) => { e.preventDefault(); switchTab('invest'); });
 
-// --- Основной игровой цикл ---
+// === Точный расчёт каждую секунду (фон) ===
 setInterval(() => {
   const now = Date.now();
   const elapsedSec = (now - gameState.lastUpdate) / 1000;
@@ -297,12 +372,13 @@ setInterval(() => {
     gameState.taxDebt += tax;
     gameState.lastUpdate = now;
 
-    // 🔥 Принудительное списание, если долг >= $5
-    if (gameState.taxDebt >= 5) {
+    if (gameState.taxDebt >= TAX_ENFORCEMENT_THRESHOLD) {
       enforceTaxPayment();
     }
 
-    updateDisplays();
     saveGame();
   }
 }, 1000);
+
+// === Автоматическое обновление UI (редко) ===
+setInterval(updateDisplays, UI_UPDATE_INTERVAL_MS);

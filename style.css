@@ -175,3 +175,19 @@ body {
   align-items: center;
   gap: 8px;
 }
+
+/* Временная кнопка сброса (для разработки) */
+.reset-dev-btn {
+  padding: 4px 10px;
+  font-size: 12px;
+  background-color: #9b59b6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 8px;
+}
+
+.reset-dev-btn:hover {
+  background-color: #8e44ad;
+}
