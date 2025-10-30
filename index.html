@@ -46,12 +46,44 @@
       <div id="rentals-list"></div>
     </div>
 
-    <!-- Инвестиции -->
-    <div id="invest-content" class="tab-content">
-      <h2>📈 Инвестиционные активы</h2>
-      <p>Вкладывайте деньги — получайте пассивный доход!</p>
-      <div id="investments-list"></div>
+<!-- Инвестиции -->
+<div id="invest-content" class="tab-content">
+  <h2>📈 Инвестиции</h2>
+  <p>Вкладывайте деньги и получайте пассивный доход. Доход начисляется ежесекундно.</p>
+
+  <div class="investment-item">
+    <h3>Акции (20% годовых)</h3>
+    <p>Баланс: $<span id="stocksBalance">0.00</span></p>
+    <p>Доход: $<span id="stocksIncome">0.00</span>/час</p>
+    <div class="invest-controls">
+      <input type="number" id="stocksInput" placeholder="Сумма" min="0" step="100">
+      <button id="stocksInvest">Вложить</button>
+      <button id="stocksWithdraw">Снять</button>
     </div>
+  </div>
+
+  <div class="investment-item">
+    <h3>Облигации (10% годовых)</h3>
+    <p>Баланс: $<span id="bondsBalance">0.00</span></p>
+    <p>Доход: $<span id="bondsIncome">0.00</span>/час</p>
+    <div class="invest-controls">
+      <input type="number" id="bondsInput" placeholder="Сумма" min="0" step="100">
+      <button id="bondsInvest">Вложить</button>
+      <button id="bondsWithdraw">Снять</button>
+    </div>
+  </div>
+
+  <div class="investment-item">
+    <h3>Фонды (15% годовых)</h3>
+    <p>Баланс: $<span id="fundsBalance">0.00</span></p>
+    <p>Доход: $<span id="fundsIncome">0.00</span>/час</p>
+    <div class="invest-controls">
+      <input type="number" id="fundsInput" placeholder="Сумма" min="0" step="100">
+      <button id="fundsInvest">Вложить</button>
+      <button id="fundsWithdraw">Снять</button>
+    </div>
+  </div>
+</div>
   </div>
   <script src="script.js"></script>
 </body>
