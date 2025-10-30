@@ -148,3 +148,30 @@ body {
   .buy-btn:not(:disabled):hover {
     background-color: #2980b9;
   }
+
+  /* Кнопка оплаты налогов */
+.pay-tax-btn {
+  margin-left: 8px;
+  padding: 4px 10px;
+  font-size: 12px;
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.pay-tax-btn:hover {
+  background-color: #c0392b;
+}
+
+.pay-tax-btn:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.tax-debt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

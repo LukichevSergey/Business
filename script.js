@@ -1,6 +1,4 @@
 // --- Конфигурация активов ---
-// income = доход в ДОЛЛАРАХ ЗА ЧАС
-
 const RENTALS = [
   { id: 'studio',     name: '1-комн. квартира',   cost: 100,    income: 10 },
   { id: 'two_room',   name: '2-комн. квартира',   cost: 300,    income: 30 },
@@ -10,19 +8,20 @@ const RENTALS = [
 ];
 
 const INVESTMENTS = [
-  { id: 'savings',        name: 'Сберегательный счёт',     cost: 50,         income: 6 },       // ROI ~8.3 ч
-  { id: 'bonds',          name: 'Государственные облигации', cost: 300,        income: 40 },      // ROI ~7.5 ч
-  { id: 'stocks',         name: 'Акции',                   cost: 2000,       income: 300 },     // ROI ~6.7 ч
-  { id: 'portfolio',      name: 'Фондовый портфель',       cost: 15000,      income: 2500 },    // ROI ~6 ч
-  { id: 'hedge_fund',     name: 'Хедж-фонд',               cost: 120000,     income: 22000 },   // ROI ~5.5 ч
-  { id: 'venture',        name: 'Венчурный капитал',       cost: 1000000,    income: 200000 },  // ROI ~5 ч
-  { id: 'private_bank',   name: 'Частный банк',            cost: 8000000,    income: 1800000 }, // ROI ~4.4 ч
-  { id: 'global_fund',    name: 'Мировой инвестиционный фонд', cost: 60000000, income: 15000000 } // ROI ~4 ч
+  { id: 'savings',        name: 'Сберегательный счёт',     cost: 50,         income: 6 },
+  { id: 'bonds',          name: 'Государственные облигации', cost: 300,        income: 40 },
+  { id: 'stocks',         name: 'Акции',                   cost: 2000,       income: 300 },
+  { id: 'portfolio',      name: 'Фондовый портфель',       cost: 15000,      income: 2500 },
+  { id: 'hedge_fund',     name: 'Хедж-фонд',               cost: 120000,     income: 22000 },
+  { id: 'venture',        name: 'Венчурный капитал',       cost: 1000000,    income: 200000 },
+  { id: 'private_bank',   name: 'Частный банк',            cost: 8000000,    income: 1800000 },
+  { id: 'global_fund',    name: 'Мировой инвестиционный фонд', cost: 60000000, income: 15000000 }
 ];
 
 // --- Игровое состояние ---
 let gameState = {
   money: 0,
+  taxDebt: 0,
   ownedRentals: {},
   ownedInvestments: {},
   lastUpdate: Date.now()
@@ -39,6 +38,8 @@ function formatNumber(num) {
 // --- DOM элементы ---
 const moneyDisplay = document.getElementById('money');
 const incomePerSecDisplay = document.getElementById('incomePerSec');
+const taxDebtDisplay = document.getElementById('taxDebt');
+const payTaxBtn = document.getElementById('payTaxBtn');
 const clickBtn = document.getElementById('clickBtn');
 const rentalsList = document.getElementById('rentals-list');
 const investmentsList = document.getElementById('investments-list');
@@ -51,7 +52,7 @@ const tabClicker = document.getElementById('tab-clicker');
 const tabRent = document.getElementById('tab-rent');
 const tabInvest = document.getElementById('tab-invest');
 
-// --- Вспомогательная функция: доход в секунду из дохода в час ---
+// --- Вспомогательная функция ---
 function hourlyToPerSecond(hourly) {
   return hourly / 3600;
 }
@@ -67,40 +68,106 @@ function loadGame() {
   if (saved) {
     const parsed = JSON.parse(saved);
     gameState.money = parseFloat(parsed.money) || 0;
+    gameState.taxDebt = parseFloat(parsed.taxDebt) || 0;
     gameState.ownedRentals = parsed.ownedRentals || {};
     gameState.ownedInvestments = parsed.ownedInvestments || {};
     gameState.lastUpdate = Number(parsed.lastUpdate) || Date.now();
   }
 }
 
-// --- Общий доход в секунду ---
-function getTotalIncomePerSecond() {
-  let total = 0;
+// --- Расчёт дохода и налога ---
+function calculateIncomeAndTax(elapsedSec) {
+  let totalIncome = 0;
+  let totalTax = 0;
 
   RENTALS.forEach(item => {
     const count = gameState.ownedRentals[item.id] || 0;
-    total += count * hourlyToPerSecond(item.income);
+    const incomePerSec = hourlyToPerSecond(item.income);
+    const income = count * incomePerSec * elapsedSec;
+    totalIncome += income;
+    totalTax += income * 0.1;
   });
 
   INVESTMENTS.forEach(inv => {
     if (gameState.ownedInvestments[inv.id]) {
-      total += hourlyToPerSecond(inv.income);
+      const incomePerSec = hourlyToPerSecond(inv.income);
+      const income = incomePerSec * elapsedSec;
+      totalIncome += income;
+      totalTax += income * 0.1;
     }
   });
 
-  return total;
+  return { income: totalIncome, tax: totalTax };
 }
 
-// --- Оффлайн-доход ---
+// --- Оффлайн-доход и налог ---
 function calculateOfflineIncome() {
   const now = Date.now();
   const elapsedSec = (now - gameState.lastUpdate) / 1000;
-  const income = getTotalIncomePerSecond() * elapsedSec;
+  const { income, tax } = calculateIncomeAndTax(elapsedSec);
   gameState.money += income;
+  gameState.taxDebt += tax;
   gameState.lastUpdate = now;
 }
 
-// --- Рендер аренды ---
+// --- Общий доход в час ---
+function getTotalHourlyIncome() {
+  let total = 0;
+  RENTALS.forEach(item => {
+    const count = gameState.ownedRentals[item.id] || 0;
+    total += count * item.income;
+  });
+  INVESTMENTS.forEach(inv => {
+    if (gameState.ownedInvestments[inv.id]) {
+      total += inv.income;
+    }
+  });
+  return total;
+}
+
+// --- Сброс игры (банкротство) ---
+function resetGame() {
+  if (confirm('Вы обанкротились! Начать новую игру?')) {
+    gameState = {
+      money: 0,
+      taxDebt: 0,
+      ownedRentals: {},
+      ownedInvestments: {},
+      lastUpdate: Date.now()
+    };
+    localStorage.removeItem('gameState');
+    updateDisplays();
+  } else {
+    // Если отказался — всё равно сбрасываем (по правилам)
+    gameState = {
+      money: 0,
+      taxDebt: 0,
+      ownedRentals: {},
+      ownedInvestments: {},
+      lastUpdate: Date.now()
+    };
+    localStorage.removeItem('gameState');
+    updateDisplays();
+  }
+}
+
+// --- Принудительное списание налога ---
+function enforceTaxPayment() {
+  if (gameState.taxDebt <= 0) return;
+
+  if (gameState.money >= gameState.taxDebt) {
+    // Хватает денег — списываем
+    gameState.money -= gameState.taxDebt;
+    gameState.taxDebt = 0;
+  } else {
+    // Не хватает → банкротство
+    alert('❗ У вас недостаточно денег для оплаты налогов!\nВы обанкротились. Игра начнётся заново.');
+    resetGame();
+    return;
+  }
+}
+
+// --- Рендер активов ---
 function renderRentals() {
   rentalsList.innerHTML = '';
   RENTALS.forEach(item => {
@@ -135,7 +202,6 @@ function renderRentals() {
   });
 }
 
-// --- Рендер инвестиций ---
 function renderInvestments() {
   investmentsList.innerHTML = '';
   INVESTMENTS.forEach(inv => {
@@ -174,9 +240,9 @@ function renderInvestments() {
 // --- Обновление интерфейса ---
 function updateDisplays() {
   moneyDisplay.textContent = `$${formatNumber(gameState.money)}`;
-  // Отображаем общий доход в час (чтобы игроку было понятно)
-  const totalHourly = getTotalIncomePerSecond() * 3600;
-  incomePerSecDisplay.textContent = `$${formatNumber(totalHourly)}`;
+  incomePerSecDisplay.textContent = `$${formatNumber(getTotalHourlyIncome())}`;
+  taxDebtDisplay.textContent = `$${formatNumber(gameState.taxDebt)}`;
+  payTaxBtn.disabled = gameState.taxDebt <= 0 || gameState.money < gameState.taxDebt;
   renderRentals();
   renderInvestments();
 }
@@ -192,6 +258,16 @@ function switchTab(tabName) {
   tabInvest.classList.toggle('active', tabName === 'invest');
 }
 
+// --- Ручная оплата налогов ---
+function payTaxes() {
+  if (gameState.taxDebt > 0 && gameState.money >= gameState.taxDebt) {
+    gameState.money -= gameState.taxDebt;
+    gameState.taxDebt = 0;
+    updateDisplays();
+    saveGame();
+  }
+}
+
 // --- Инициализация ---
 loadGame();
 calculateOfflineIncome();
@@ -205,15 +281,27 @@ clickBtn.addEventListener('click', () => {
   saveGame();
 });
 
+payTaxBtn.addEventListener('click', payTaxes);
+
 tabClicker.addEventListener('click', (e) => { e.preventDefault(); switchTab('clicker'); });
 tabRent.addEventListener('click', (e) => { e.preventDefault(); switchTab('rent'); });
 tabInvest.addEventListener('click', (e) => { e.preventDefault(); switchTab('invest'); });
 
-// --- Онлайн-доход каждую секунду ---
+// --- Основной игровой цикл ---
 setInterval(() => {
-  const income = getTotalIncomePerSecond();
-  if (income > 0) {
+  const now = Date.now();
+  const elapsedSec = (now - gameState.lastUpdate) / 1000;
+  if (elapsedSec >= 1) {
+    const { income, tax } = calculateIncomeAndTax(elapsedSec);
     gameState.money += income;
+    gameState.taxDebt += tax;
+    gameState.lastUpdate = now;
+
+    // 🔥 Принудительное списание, если долг >= $5
+    if (gameState.taxDebt >= 5) {
+      enforceTaxPayment();
+    }
+
     updateDisplays();
     saveGame();
   }
