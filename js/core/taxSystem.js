@@ -76,7 +76,10 @@ Game.TaxSystem = {
 
     // Бизнесы
     Game.CONFIG.BUSINESSES.forEach(biz => {
-      total += Game.BusinessSystem.getIncome(biz.id);
+      const level = Game.State.businesses[biz.id] || 0;
+      if (level > 0) {
+        total += biz.levels[level - 1].income;
+      }
     });
 
     return total;
