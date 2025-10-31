@@ -3,13 +3,14 @@ window.Game = window.Game || {};
 Game.CONFIG = {
   TAX_RATE: 0.1,
   TAX_ENFORCEMENT_THRESHOLD: 100,
-  UI_UPDATE_INTERVAL_MS: 1000,
+  UI_UPDATE_INTERVAL_MS: 3000,
   HOURS_TO_SECONDS: 3600,
 
-  INVESTMENT_RATES: {
-    stocks: 0.20,
-    bonds: 0.10,
-    funds: 0.15
+  // Доход от инвестиций: $ в час за каждые $100 вложенных
+  INVESTMENT_HOURLY_YIELD: {
+    stocks: 8,    // $8/час за $100
+    bonds: 4,     // $4/час за $100
+    funds: 6      // $6/час за $100
   },
 
   BASE_DAILY_INCOME: 10,
@@ -30,11 +31,12 @@ Game.CONFIG = {
     higher: 600
   },
 
+  // Аренда: более дорогие объекты — эффективнее
   ASSETS: [
-    { id: 'studio', name: '1-комн. квартира', cost: 100, income: 10, type: 'rental', isUnique: false },
-    { id: 'two_room', name: '2-комн. квартира', cost: 300, income: 30, type: 'rental', isUnique: false },
-    { id: 'three_room', name: '3-комн. квартира', cost: 800, income: 80, type: 'rental', isUnique: false },
-    { id: 'house1', name: 'Одноэтажный дом', cost: 2500, income: 250, type: 'rental', isUnique: false },
-    { id: 'house2', name: 'Двухэтажный дом', cost: 7000, income: 700, type: 'rental', isUnique: false }
+    { id: 'studio',     name: '1-комн. квартира',   cost: 100,    income: 10 },    // 10.0 $/час на $100
+    { id: 'two_room',   name: '2-комн. квартира',   cost: 300,    income: 36 },    // 12.0
+    { id: 'three_room', name: '3-комн. квартира',   cost: 800,    income: 112 },   // 14.0
+    { id: 'house1',     name: 'Одноэтажный дом',    cost: 2500,   income: 400 },   // 16.0
+    { id: 'house2',     name: 'Двухэтажный дом',    cost: 7000,   income: 1260 }   // 18.0
   ]
 };

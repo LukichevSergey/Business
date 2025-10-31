@@ -16,14 +16,15 @@ Game.UI = {
 
     // Инвестиции
     const inv = state.investments;
+    const yield = Game.CONFIG.INVESTMENT_HOURLY_YIELD;
+
     document.getElementById('stocksBalance').textContent = Game.Utils.formatNumber(inv.stocks);
     document.getElementById('bondsBalance').textContent = Game.Utils.formatNumber(inv.bonds);
     document.getElementById('fundsBalance').textContent = Game.Utils.formatNumber(inv.funds);
 
-    const rates = Game.CONFIG.INVESTMENT_RATES;
-    document.getElementById('stocksIncome').textContent = Game.Utils.formatNumber(inv.stocks * rates.stocks / 365 / 24);
-    document.getElementById('bondsIncome').textContent = Game.Utils.formatNumber(inv.bonds * rates.bonds / 365 / 24);
-    document.getElementById('fundsIncome').textContent = Game.Utils.formatNumber(inv.funds * rates.funds / 365 / 24);
+    document.getElementById('stocksIncome').textContent = Game.Utils.formatNumber((inv.stocks / 100) * yield.stocks);
+    document.getElementById('bondsIncome').textContent = Game.Utils.formatNumber((inv.bonds / 100) * yield.bonds);
+    document.getElementById('fundsIncome').textContent = Game.Utils.formatNumber((inv.funds / 100) * yield.funds);
 
     // Работа
     let status = 'Готов к работе';
