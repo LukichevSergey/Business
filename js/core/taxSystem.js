@@ -10,50 +10,48 @@ Game.TaxSystem = {
     if (elapsedSec <= 0) return { income: 0, tax: 0 };
 
     const effects = Game.UpgradeSystem.getEffects();
-    const taxRate = effects.taxRate; // может быть 0.1 или 0.08 с улучшением
+    const taxRate = effects.taxRate;
+    const speed = Game.CONFIG.GAME_SPEED_MULTIPLIER;
 
     let totalIncome = 0;
     let totalTax = 0;
 
-    // === 1. Аренда ===
+    // Аренда
     Game.CONFIG.ASSETS.forEach(asset => {
       const count = Game.State.ownedRentals[asset.id] || 0;
       if (count > 0) {
         const baseIncomePerSec = Game.Utils.hourlyToPerSecond(asset.income);
         const boostedIncomePerSec = baseIncomePerSec * effects.rentalMultiplier;
-        const income = boostedIncomePerSec * elapsedSec;
+        const income = (boostedIncomePerSec * elapsedSec) * speed;
         totalIncome += income;
         totalTax += income * taxRate;
       }
     });
 
-    // === 2. Инвестиции ===
+    // Инвестиции
     for (const [type, balance] of Object.entries(Game.State.investments)) {
       if (balance > 0) {
         const yieldPer100 = Game.CONFIG.INVESTMENT_HOURLY_YIELD[type] || 0;
         const hourlyIncome = (balance / 100) * yieldPer100;
         const boostedHourlyIncome = hourlyIncome * effects.investmentMultiplier;
         const incomePerSec = boostedHourlyIncome / 3600;
-        const income = incomePerSec * elapsedSec;
+        const income = (incomePerSec * elapsedSec) * speed;
         totalIncome += income;
         totalTax += income * taxRate;
       }
     }
 
-    // === 3. Бизнесы ===
+    // Бизнесы
     Game.CONFIG.BUSINESSES.forEach(biz => {
       const level = Game.State.businesses[biz.id] || 0;
       if (level > 0) {
         const incomeHourly = biz.levels[level - 1].income;
         const incomePerSec = incomeHourly / 3600;
-        const income = incomePerSec * elapsedSec;
+        const income = (incomePerSec * elapsedSec) * speed;
         totalIncome += income;
         totalTax += income * taxRate;
       }
     });
-
-    // === 4. Работа НЕ даёт пассивного дохода — только активные сессии ===
-    // (поэтому здесь не учитывается)
 
     return { income: totalIncome, tax: totalTax };
   },

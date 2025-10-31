@@ -1,6 +1,10 @@
 window.Game = window.Game || {};
 
 Game.CONFIG = {
+
+    /** @constant {number} Глобальный множитель скорости игры (1 = нормально, 5 = ускорено в 5 раз) */
+  GAME_SPEED_MULTIPLIER: 1,
+
   TAX_RATE: 0.1,
   TAX_ENFORCEMENT_THRESHOLD: 100,
   UI_UPDATE_INTERVAL_MS: 3000,

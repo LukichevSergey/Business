@@ -31,6 +31,8 @@ Game.UI = {
     document.getElementById('bondsIncome').textContent = Game.Utils.formatNumber((inv.bonds / 100) * yield.bonds);
     document.getElementById('fundsIncome').textContent = Game.Utils.formatNumber((inv.funds / 100) * yield.funds);
 
+    document.getElementById('gameSpeed').textContent = Game.CONFIG.GAME_SPEED_MULTIPLIER;
+
     // Работа
     let status = 'Готов к работе';
     let workBtnDisabled = false;

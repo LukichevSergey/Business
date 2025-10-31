@@ -28,14 +28,15 @@ Game.WorkSystem = {
   startWork() {
     if (Game.State.workSessionEnd > 0 || Game.State.studySessionEnd > 0) return false;
     this.updateStreak();
-    Game.State.workSessionEnd = Date.now() + Game.CONFIG.WORK_DURATION_SEC * 1000;
+    const actualDuration = Game.CONFIG.WORK_DURATION_SEC / Game.CONFIG.GAME_SPEED_MULTIPLIER;
+    Game.State.workSessionEnd = Date.now() + actualDuration * 1000;
     return true;
   },
 
   startEducation(level) {
     if (Game.State.workSessionEnd > 0 || Game.State.studySessionEnd > 0) return false;
     if (Game.State.education === level) return false;
-    const duration = Game.CONFIG.EDUCATION_DURATION[level];
+    const duration = Game.CONFIG.EDUCATION_DURATION[level] / Game.CONFIG.GAME_SPEED_MULTIPLIER;
     if (!duration) return false;
     Game.State.studySessionEnd = Date.now() + duration * 1000;
     return true;
