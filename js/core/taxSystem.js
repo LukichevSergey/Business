@@ -14,7 +14,7 @@ Game.TaxSystem = {
       totalTax += income * Game.CONFIG.TAX_RATE;
     });
 
-    // Инвестиции: доход = (баланс / 100) * доход_за_100
+    // Инвестиции
     for (const [type, balance] of Object.entries(Game.State.investments)) {
       if (balance > 0) {
         const yieldPer100 = Game.CONFIG.INVESTMENT_HOURLY_YIELD[type] || 0;
@@ -25,6 +25,17 @@ Game.TaxSystem = {
         totalTax += income * Game.CONFIG.TAX_RATE;
       }
     }
+
+    // Бизнесы
+    Game.CONFIG.BUSINESSES.forEach(biz => {
+      const incomeHourly = Game.BusinessSystem.getIncome(biz.id);
+      if (incomeHourly > 0) {
+        const incomePerSec = incomeHourly / 3600;
+        const income = incomePerSec * elapsedSec;
+        totalIncome += income;
+        totalTax += income * Game.CONFIG.TAX_RATE;
+      }
+    });
 
     return { income: totalIncome, tax: totalTax };
   },
@@ -43,6 +54,11 @@ Game.TaxSystem = {
       const yieldPer100 = Game.CONFIG.INVESTMENT_HOURLY_YIELD[type] || 0;
       total += (balance / 100) * yieldPer100;
     }
+
+    // Бизнесы
+    Game.CONFIG.BUSINESSES.forEach(biz => {
+      total += Game.BusinessSystem.getIncome(biz.id);
+    });
 
     return total;
   },

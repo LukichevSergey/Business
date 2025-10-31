@@ -14,6 +14,9 @@ Game.UI = {
     // Аренда
     Game.RentalSystem.render(document.getElementById('rentals-list'));
 
+    // Бизнес
+    Game.BusinessSystem.render(document.getElementById('businesses-list'));
+
     // Инвестиции
     const inv = state.investments;
     const yield = Game.CONFIG.INVESTMENT_HOURLY_YIELD;

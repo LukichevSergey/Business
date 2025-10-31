@@ -25,6 +25,7 @@ Game.State = {
         money: parseFloat(parsed.money) || 0,
         taxDebt: parseFloat(parsed.taxDebt) || 0,
         ownedRentals: parsed.ownedRentals || {},
+        businesses: parsed.businesses || {},
         investments: {
           stocks: parseFloat(parsed.investments?.stocks) || 0,
           bonds: parseFloat(parsed.investments?.bonds) || 0,
@@ -46,6 +47,7 @@ Game.State = {
       money: 0,
       taxDebt: 0,
       ownedRentals: {},
+      businesses: {},
       investments: { stocks: 0, bonds: 0, funds: 0 },
       education: 'none',
       lastWorkTimestamp: 0,

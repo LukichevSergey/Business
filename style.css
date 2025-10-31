@@ -242,3 +242,38 @@ nav ul li a:hover {
   background-color: #bdc3c7;
   cursor: not-allowed;
 }
+
+/* Бизнес */
+.business-item {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 16px;
+  margin: 16px 0;
+  text-align: left;
+}
+
+.business-item h3 {
+  margin-top: 0;
+  color: #2c3e50;
+}
+
+.upgrade-btn, .buy-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  background-color: #3498db;
+  color: white;
+}
+
+.upgrade-btn:hover, .buy-btn:hover {
+  background-color: #2980b9;
+}
+
+.upgrade-btn:disabled, .buy-btn:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+}
