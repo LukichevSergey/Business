@@ -30,6 +30,49 @@ Game.CONFIG = {
     higher: 600
   },
 
+  UPGRADES: [
+    {
+      id: 'accountant',
+      name: '📚 Бухгалтер',
+      description: 'Налоги снижены с 10% до 8%',
+      cost: 1000,
+      condition: () => Game.State.money >= 500,
+      effect: () => ({ taxRate: 0.08 })
+    },
+    {
+      id: 'property_manager',
+      name: '🏗️ Управляющая компания',
+      description: '+15% к доходу от аренды',
+      cost: 3000,
+      condition: () => Object.values(Game.State.ownedRentals).reduce((a, b) => a + b, 0) >= 3,
+      effect: () => ({ rentalMultiplier: 1.15 })
+    },
+    {
+      id: 'financial_advisor',
+      name: '📊 Финансовый советник',
+      description: '+10% к доходу от инвестиций',
+      cost: 5000,
+      condition: () => (Game.State.investments.stocks + Game.State.investments.bonds + Game.State.investments.funds) >= 1000,
+      effect: () => ({ investmentMultiplier: 1.10 })
+    },
+    {
+      id: 'business_incubator',
+      name: '🚀 Бизнес-инкубатор',
+      description: '–20% к стоимости улучшения бизнеса',
+      cost: 10000,
+      condition: () => Object.values(Game.State.businesses).some(level => level >= 2),
+      effect: () => ({ businessDiscount: 0.8 })
+    },
+    {
+      id: 'mba',
+      name: '🎓 MBA',
+      description: 'Макс. стаж работы — 11 дней (+1)',
+      cost: 20000,
+      condition: () => Game.State.education === 'higher',
+      effect: () => ({ maxStreakDays: 11 })
+    }
+  ],
+
   // Аренда: более дорогие объекты — эффективнее
   ASSETS: [
     { id: 'studio',     name: '1-комн. квартира',   cost: 100,    income: 1.5 },

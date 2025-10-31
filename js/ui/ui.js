@@ -17,6 +17,8 @@ Game.UI = {
     // Бизнес
     Game.BusinessSystem.render(document.getElementById('businesses-list'));
 
+    Game.UpgradeSystem.render(document.getElementById('upgrades-list'));
+
     // Инвестиции
     const inv = state.investments;
     const yield = Game.CONFIG.INVESTMENT_HOURLY_YIELD;

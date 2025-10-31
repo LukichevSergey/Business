@@ -3,6 +3,8 @@ window.Game = window.Game || {};
 Game.WorkSystem = {
   updateStreak() {
     const now = Date.now();
+    const maxDays = Game.UpgradeSystem.getEffects().maxStreakDays;
+
     if (Game.State.lastWorkTimestamp === 0) {
       Game.State.currentStreakDays = 1;
     } else {
@@ -10,7 +12,7 @@ Game.WorkSystem = {
       if (diffDays > 1) {
         Game.State.currentStreakDays = 1;
       } else if (diffDays >= 0.9) {
-        Game.State.currentStreakDays = Math.min(Game.State.currentStreakDays + 1, Game.CONFIG.MAX_STREAK_DAYS);
+        Game.State.currentStreakDays = Math.min(Game.State.currentStreakDays + 1, maxDays);
       }
     }
     Game.State.lastWorkTimestamp = now;

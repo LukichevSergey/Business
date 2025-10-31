@@ -35,10 +35,13 @@ Game.BusinessSystem = {
     const nextLevel = currentLevel + 1;
     if (nextLevel > business.levels.length) return false;
 
-    const cost = business.levels[nextLevel - 1].cost;
-    if (Game.State.money < cost) return false;
+    const baseCost = business.levels[nextLevel - 1].cost;
+    const discount = Game.UpgradeSystem.getEffects().businessDiscount;
+    const finalCost = baseCost * discount;
 
-    Game.State.money -= cost;
+    if (Game.State.money < finalCost) return false;
+
+    Game.State.money -= finalCost;
     Game.State.businesses[businessId] = nextLevel;
     return true;
   },

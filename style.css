@@ -277,3 +277,33 @@ nav ul li a:hover {
   background-color: #bdc3c7;
   cursor: not-allowed;
 }
+
+.upgrade-item {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 16px;
+  margin: 16px 0;
+  text-align: left;
+}
+
+.upgrade-item h3 {
+  margin-top: 0;
+  color: #2c3e50;
+}
+
+.buy-upgrade-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  background-color: #9b59b6;
+  color: white;
+}
+
+.buy-upgrade-btn:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+}

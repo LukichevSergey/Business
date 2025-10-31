@@ -18,6 +18,10 @@ Game.Tabs = {
       e.preventDefault();
       this.switchTab('business');
     });
+    document.getElementById('tab-upgrades').addEventListener('click', (e) => {
+      e.preventDefault();
+      this.switchTab('upgrades');
+    });
   },
 
   switchTab(name) {
@@ -25,10 +29,12 @@ Game.Tabs = {
     document.getElementById('rent-content').classList.toggle('active', name === 'rent');
     document.getElementById('invest-content').classList.toggle('active', name === 'invest');
     document.getElementById('business-content').classList.toggle('active', name === 'business');
+    document.getElementById('upgrades-content').classList.toggle('active', name === 'upgrades');
 
     document.getElementById('tab-work').classList.toggle('active', name === 'work');
     document.getElementById('tab-rent').classList.toggle('active', name === 'rent');
     document.getElementById('tab-invest').classList.toggle('active', name === 'invest');
     document.getElementById('tab-business').classList.toggle('active', name === 'business');
+    document.getElementById('tab-upgrades').classList.toggle('active', name === 'upgrades');
   }
 };
